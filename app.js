@@ -341,8 +341,14 @@ function rebuildIndex() {
   allRecipes.forEach((r, i) => recipeIndexMap.set(r.name + '|' + (r.name_it || ''), i));
 }
 
-// ── REWE Preise ──
-const REWE_PROXY = '/rewe';
+// ── Marktguru Preise (REWE, EDEKA, Lidl, Aldi, Kaufland, Penny, …) ──
+const MARKTGURU_URL = 'https://api.marktguru.de/api/v1/offers/search';
+const MARKTGURU_HEADERS = {
+  'x-clientkey': 'WU/RH+PMGDi+gkZer3WbMelt6zcYHSTytNB7VpTia90=',
+  'x-apikey':    '8Kk+pmbf7TgJ9nVj2cXeA7P5zBGv8iuutVVMRfOfvNE=',
+  'Accept':      'application/json',
+};
+const MARKTGURU_ZIP = localStorage.getItem('cucina_zip') || '80331'; // Default: München
 const PRICE_SKIP = new Set(['salz', 'pfeffer', 'wasser', 'zucker', 'geschmack', 'fond', 'brühe', 'essig', 'zitronensaft', 'gewürz', 'gewürze']);
 const PRICE_UNITS = ['g','kg','ml','l','cl','dl','el','tl','stück','pkg','bund','prise','prisen','dose','dosen','becher','tasse','tassen','scheibe','scheiben'];
 const PRICE_UNITS_RE = new RegExp(`\\b(${PRICE_UNITS.join('|')})\\b`, 'gi');
@@ -388,36 +394,39 @@ async function fetchRewePrice(term) {
   if (priceCache.has(term)) return priceCache.get(term);
 
   try {
-    const resp = await fetch(`${REWE_PROXY}?q=${encodeURIComponent(term)}`, { signal: AbortSignal.timeout(5000) });
+    const url = `${MARKTGURU_URL}?as=web&limit=10&offset=0&q=${encodeURIComponent(term)}&zipCode=${MARKTGURU_ZIP}`;
+    const resp = await fetch(url, { headers: MARKTGURU_HEADERS, signal: AbortSignal.timeout(5000) });
     if (!resp.ok) { priceCache.set(term, null); return null; }
     const data = await resp.json();
 
-    const products = data.products || data.data?.products || [];
-    if (!products.length) { priceCache.set(term, null); return null; }
+    const offers = data.results || [];
+    if (!offers.length) { priceCache.set(term, null); return null; }
 
-    const first = products[0];
-    let price = first?.pricing?.currentRetailPrice
-      ?? first?.priceData?.price
-      ?? first?.price
-      ?? first?.currentRetailPrice
-      ?? null;
+    // Günstigstes Angebot wählen (numerische Preise, sonst erstes)
+    const withPrice = offers.filter(o => typeof o.price === 'number');
+    const best = withPrice.length
+      ? withPrice.reduce((a, b) => a.price <= b.price ? a : b)
+      : offers[0];
 
-    if (price == null) { priceCache.set(term, null); return null; }
+    const price = best.price;
+    if (typeof price !== 'number') { priceCache.set(term, null); return null; }
 
-    // Erkennung: Cents (integer, z.B. 199) vs. Euro (float, z.B. 1.99)
-    if (Number.isInteger(price) && price > 10) price = price / 100;
+    const brand    = best.brand?.name || '';
+    const desc     = best.description || '';
+    const retailer = best.advertisers?.[0]?.name || '';
 
     const result = {
       price: price.toFixed(2),
-      name: first.name || first.productName || term,
-      grammage: first.grammage || first.weightOrVolume || ''
+      name: [brand, desc].filter(Boolean).join(' · ') || term,
+      grammage: retailer, // Retailer im title-Tooltip
+      retailer
     };
 
     priceCache.set(term, result);
     savePriceCache();
     return result;
   } catch {
-    return null; // Proxy nicht erreichbar → still scheitern
+    return null;
   }
 }
 
