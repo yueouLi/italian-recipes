@@ -348,7 +348,88 @@ const MARKTGURU_HEADERS = {
   'x-apikey':    '8Kk+pmbf7TgJ9nVj2cXeA7P5zBGv8iuutVVMRfOfvNE=',
   'Accept':      'application/json',
 };
-const MARKTGURU_ZIP = localStorage.getItem('cucina_zip') || '80331'; // Default: München
+const RETAILER_LIST = ['REWE', 'EDEKA', 'Lidl', 'ALDI SÜD', 'ALDI Nord', 'Kaufland', 'Penny', 'Netto', 'nahkauf', 'E center', 'AEZ'];
+
+function getZipCode() {
+  return localStorage.getItem('cucina_zip') || '80331';
+}
+function getSelectedRetailers() {
+  try {
+    const s = localStorage.getItem('cucina_retailers');
+    if (!s) return null; // null = alle
+    const arr = JSON.parse(s);
+    return Array.isArray(arr) && arr.length ? new Set(arr) : null;
+  } catch { return null; }
+}
+
+function initSettings() {
+  const langSwitch = document.getElementById('lang-switch');
+  if (!langSwitch || document.getElementById('settings-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'settings-btn';
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'Einstellungen');
+  btn.textContent = '⚙';
+  btn.style.cssText = 'background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;line-height:1;';
+  btn.addEventListener('click', openSettings);
+  langSwitch.parentNode.appendChild(btn);
+}
+
+function openSettings() {
+  const zip = getZipCode();
+  const sel = getSelectedRetailers();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'settings-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:24px;max-width:420px;width:100%;max-height:80vh;overflow:auto;font-family:inherit;">
+      <h2 style="margin:0 0 16px;font-size:20px;">⚙️ Einstellungen</h2>
+
+      <label style="display:block;font-weight:600;margin-bottom:6px;font-size:14px;">PLZ (für lokale Angebote)</label>
+      <input id="zip-input" type="text" inputmode="numeric" maxlength="5" value="${esc(zip)}" placeholder="z.B. 80331"
+        style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;margin-bottom:18px;">
+
+      <label style="display:block;font-weight:600;margin-bottom:8px;font-size:14px;">Märkte in deiner Nähe</label>
+      <div id="retailers-list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:20px;">
+        ${RETAILER_LIST.map(r => `
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;padding:4px 0;">
+            <input type="checkbox" value="${esc(r)}" ${!sel || sel.has(r) ? 'checked' : ''}>
+            <span>${esc(r)}</span>
+          </label>
+        `).join('')}
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="settings-cancel" type="button"
+          style="padding:10px 16px;border:1px solid var(--border);background:white;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;">Abbrechen</button>
+        <button id="settings-save" type="button"
+          style="padding:10px 16px;background:var(--red);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:14px;">Speichern</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  overlay.querySelector('#settings-cancel').addEventListener('click', close);
+  overlay.querySelector('#settings-save').addEventListener('click', () => {
+    const newZip = overlay.querySelector('#zip-input').value.trim();
+    const checked = [...overlay.querySelectorAll('#retailers-list input:checked')].map(i => i.value);
+
+    if (/^\d{5}$/.test(newZip)) localStorage.setItem('cucina_zip', newZip);
+    if (checked.length === RETAILER_LIST.length) {
+      localStorage.removeItem('cucina_retailers'); // alle = kein Filter
+    } else {
+      localStorage.setItem('cucina_retailers', JSON.stringify(checked));
+    }
+    localStorage.removeItem('cucina_prices'); // Cache leeren, neue Preise laden
+    location.reload();
+  });
+}
 const PRICE_SKIP = new Set(['salz', 'pfeffer', 'wasser', 'zucker', 'geschmack', 'fond', 'brühe', 'essig', 'zitronensaft', 'gewürz', 'gewürze']);
 const PRICE_UNITS = ['g','kg','ml','l','cl','dl','el','tl','stück','pkg','bund','prise','prisen','dose','dosen','becher','tasse','tassen','scheibe','scheiben'];
 const PRICE_UNITS_RE = new RegExp(`\\b(${PRICE_UNITS.join('|')})\\b`, 'gi');
@@ -391,38 +472,41 @@ function extractSearchTerm(ing) {
 }
 
 async function fetchRewePrice(term) {
-  if (priceCache.has(term)) return priceCache.get(term);
+  const cacheKey = term + '|' + getZipCode() + '|' + (localStorage.getItem('cucina_retailers') || '*');
+  if (priceCache.has(cacheKey)) return priceCache.get(cacheKey);
 
   try {
-    const url = `${MARKTGURU_URL}?as=web&limit=10&offset=0&q=${encodeURIComponent(term)}&zipCode=${MARKTGURU_ZIP}`;
+    const url = `${MARKTGURU_URL}?as=web&limit=20&offset=0&q=${encodeURIComponent(term)}&zipCode=${getZipCode()}`;
     const resp = await fetch(url, { headers: MARKTGURU_HEADERS, signal: AbortSignal.timeout(5000) });
-    if (!resp.ok) { priceCache.set(term, null); return null; }
+    if (!resp.ok) { priceCache.set(cacheKey, null); return null; }
     const data = await resp.json();
 
-    const offers = data.results || [];
-    if (!offers.length) { priceCache.set(term, null); return null; }
+    let offers = (data.results || []).filter(o => typeof o.price === 'number');
 
-    // Günstigstes Angebot wählen (numerische Preise, sonst erstes)
-    const withPrice = offers.filter(o => typeof o.price === 'number');
-    const best = withPrice.length
-      ? withPrice.reduce((a, b) => a.price <= b.price ? a : b)
-      : offers[0];
+    // Nach gewählten Märkten filtern (sonst alle)
+    const selected = getSelectedRetailers();
+    if (selected) {
+      offers = offers.filter(o => {
+        const ret = o.advertisers?.[0]?.name;
+        return ret && selected.has(ret);
+      });
+    }
 
-    const price = best.price;
-    if (typeof price !== 'number') { priceCache.set(term, null); return null; }
+    if (!offers.length) { priceCache.set(cacheKey, null); return null; }
 
+    const best = offers.reduce((a, b) => a.price <= b.price ? a : b);
     const brand    = best.brand?.name || '';
     const desc     = best.description || '';
     const retailer = best.advertisers?.[0]?.name || '';
 
     const result = {
-      price: price.toFixed(2),
+      price: best.price.toFixed(2),
       name: [brand, desc].filter(Boolean).join(' · ') || term,
-      grammage: retailer, // Retailer im title-Tooltip
-      retailer
+      grammage: '',
+      retailer,
     };
 
-    priceCache.set(term, result);
+    priceCache.set(cacheKey, result);
     savePriceCache();
     return result;
   } catch {
@@ -460,8 +544,9 @@ async function loadPricesForModal(ingredients) {
     if (result) {
       const badge = existing || document.createElement('span');
       badge.className = 'rewe-price';
-      badge.textContent = result.price + ' €';
-      badge.title = result.name + (result.grammage ? ' · ' + result.grammage : '');
+      const retailerHtml = result.retailer ? `<small style="opacity:0.65;margin-left:4px;font-weight:500;">${esc(result.retailer)}</small>` : '';
+      badge.innerHTML = `${esc(result.price)} €${retailerHtml}`;
+      badge.title = result.name;
       if (!existing) li.appendChild(badge);
     } else {
       existing?.remove();
@@ -1074,6 +1159,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   // Apply saved language on load
   applyLang(currentLang);
+
+  // Settings (PLZ + Retailers)
+  initSettings();
 
   // Load data
   loadRecipes();
