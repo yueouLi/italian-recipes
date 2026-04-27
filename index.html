@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cucina Italiana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-nav" href="#main-content" data-i18n="skipNav">Zum Inhalt springen</a>
+
+  <nav role="navigation" aria-label="Hauptnavigation">
+    <div class="logo">cucina <span>italiana</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div id="nav-count" style="font-size:13px;color:var(--text-mid)"></div>
+      <div class="lang-switch" id="lang-switch">
+        <button class="lang-btn active" data-lang="de" type="button">DE</button>
+        <button class="lang-btn" data-lang="en" type="button">EN</button>
+        <button class="lang-btn" data-lang="zh" type="button">中</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <h1 data-i18n="heroTitle" data-i18n-html="1">Finde dein <em>perfektes</em> Rezept</h1>
+    <p data-i18n="heroSub">232 authentische Rezepte aus Die echte italienische K&uuml;che</p>
+  </header>
+
+  <main class="main" id="main-content">
+
+    <!-- Search -->
+    <section class="scard" aria-label="Zutaten-Suche">
+      <div class="slabel" data-i18n="searchLabel">Zutaten eingeben</div>
+      <div class="irow">
+        <input id="ingredient-input" class="iinput" type="text"
+               placeholder="z.B. Tomate, Mozzarella ..."
+               data-i18n="searchPlaceholder" data-i18n-attr="placeholder"
+               aria-label="Zutat eingeben" autocomplete="off">
+        <button id="add-ing-btn" class="abtn" type="button" aria-label="Zutat hinzuf&uuml;gen">+</button>
+      </div>
+      <div id="tags" class="tags" role="list" aria-label="Gew&auml;hlte Zutaten"></div>
+      <button id="match-btn" class="mbtn" type="button" data-i18n="matchBtn">Rezepte finden</button>
+    </section>
+
+    <!-- Filter: Kategorie -->
+    <section class="fg" aria-label="Filter nach Kategorie">
+      <h2 class="ft" data-i18n="fCategory">Kategorie</h2>
+      <div class="chips" role="group" aria-label="Kategorie-Filter">
+        <button class="chip cat" data-group="category" data-val="Antipasti" type="button" data-i18n="cAntipasti">Antipasti</button>
+        <button class="chip cat" data-group="category" data-val="Pasta" type="button" data-i18n="cPasta">Pasta</button>
+        <button class="chip cat" data-group="category" data-val="Risotto" type="button" data-i18n="cRisotto">Risotto</button>
+        <button class="chip cat" data-group="category" data-val="Suppe" type="button" data-i18n="cSuppe">Suppe</button>
+        <button class="chip cat" data-group="category" data-val="Fisch" type="button" data-i18n="cFisch">Fisch</button>
+        <button class="chip cat" data-group="category" data-val="Fleisch" type="button" data-i18n="cFleisch">Fleisch</button>
+        <button class="chip cat" data-group="category" data-val="Gem&uuml;se" type="button" data-i18n="cGemuese">Gem&uuml;se</button>
+        <button class="chip cat" data-group="category" data-val="Dessert" type="button" data-i18n="cDessert">Dessert</button>
+        <button class="chip cat" data-group="category" data-val="Sonstiges" type="button" data-i18n="cSonstiges">Sonstiges</button>
+      </div>
+    </section>
+
+    <!-- Filter: Schwierigkeit -->
+    <section class="fg" aria-label="Filter nach Schwierigkeit">
+      <h2 class="ft" data-i18n="fDifficulty">Schwierigkeit</h2>
+      <div class="chips" role="group" aria-label="Schwierigkeits-Filter">
+        <button class="chip diff" data-group="difficulty" data-val="Einfach" type="button" data-i18n="dEinfach">Einfach</button>
+        <button class="chip diff" data-group="difficulty" data-val="Mittel" type="button" data-i18n="dMittel">Mittel</button>
+        <button class="chip diff" data-group="difficulty" data-val="Schwer" type="button" data-i18n="dSchwer">Schwer</button>
+      </div>
+    </section>
+
+    <!-- Filter: Zeit -->
+    <section class="fg" aria-label="Filter nach Zeitaufwand">
+      <h2 class="ft" data-i18n="fTime">Zeitaufwand</h2>
+      <div class="chips" role="group" aria-label="Zeit-Filter">
+        <button class="chip time" data-group="time" data-val="30" type="button" data-i18n="t30">Unter 30 Min</button>
+        <button class="chip time" data-group="time" data-val="60" type="button" data-i18n="t60">Unter 1 Std</button>
+        <button class="chip time" data-group="time" data-val="120" type="button" data-i18n="t120">Unter 2 Std</button>
+      </div>
+    </section>
+
+    <!-- Filter: Stimmung -->
+    <section class="fg" aria-label="Filter nach Stimmung">
+      <h2 class="ft" data-i18n="fMood">Stimmung</h2>
+      <div class="chips" role="group" aria-label="Stimmungs-Filter">
+        <button class="chip mood" data-group="mood" data-val="schnell" type="button" data-i18n="mSchnell">Schnell</button>
+        <button class="chip mood" data-group="mood" data-val="comfort" type="button" data-i18n="mComfort">Comfort Food</button>
+        <button class="chip mood" data-group="mood" data-val="leicht" type="button" data-i18n="mLeicht">Leicht &amp; Frisch</button>
+        <button class="chip mood" data-group="mood" data-val="besonderes" type="button" data-i18n="mBesonderes">Besonders</button>
+      </div>
+    </section>
+
+    <!-- Filter: Anlass -->
+    <section class="fg" aria-label="Filter nach Anlass">
+      <h2 class="ft" data-i18n="fOccasion">Anlass</h2>
+      <div class="chips" role="group" aria-label="Anlass-Filter">
+        <button class="chip occ" data-group="occasion" data-val="woche" type="button" data-i18n="oWoche">Unter der Woche</button>
+        <button class="chip occ" data-group="occasion" data-val="sonntag" type="button" data-i18n="oSonntag">Sonntagsgericht</button>
+        <button class="chip occ" data-group="occasion" data-val="familie" type="button" data-i18n="oFamilie">Familie</button>
+        <button class="chip occ" data-group="occasion" data-val="freunde" type="button" data-i18n="oFreunde">F&uuml;r G&auml;ste</button>
+      </div>
+    </section>
+
+    <!-- Filter: Protein -->
+    <section class="fg" aria-label="Filter nach Protein">
+      <h2 class="ft" data-i18n="fProtein">Protein</h2>
+      <div class="chips" role="group" aria-label="Protein-Filter">
+        <button class="chip prot" data-group="protein" data-val="vegetarisch" type="button" data-i18n="pVegetarisch">Vegetarisch</button>
+        <button class="chip prot" data-group="protein" data-val="fisch" type="button" data-i18n="pFisch">Fisch</button>
+        <button class="chip prot" data-group="protein" data-val="fleisch" type="button" data-i18n="pFleisch">Fleisch</button>
+        <button class="chip prot" data-group="protein" data-val="meeresfr&uuml;chte" type="button" data-i18n="pMeer">Meeresfr&uuml;chte</button>
+      </div>
+    </section>
+
+    <!-- Filter: Meine Rezepte -->
+    <section class="fg" aria-label="Filter eigene Rezepte">
+      <h2 class="ft" data-i18n="fMine">Meine Rezepte</h2>
+      <div class="chips" role="group" aria-label="Eigene-Rezepte-Filter">
+        <button class="chip mine" data-group="mine" data-val="user" type="button" data-i18n="mUser">Eigene Rezepte</button>
+        <button class="chip mine" data-group="mine" data-val="cooked" type="button" data-i18n="mCooked">Gekocht</button>
+        <button class="chip mine" data-group="mine" data-val="fav" type="button" data-i18n="mFav">Favoriten</button>
+        <button class="chip mine" data-group="mine" data-val="rated" type="button" data-i18n="mRated">Bewertet</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <div class="rbar">
+      <h2 class="rtitle" data-i18n="allRecipes">Alle Rezepte</h2>
+      <span id="rcount" class="rcount"></span>
+    </div>
+    <div id="grid" class="grid" role="list" aria-label="Rezeptliste"></div>
+  </main>
+
+  <!-- FAB -->
+  <button id="fab-add" class="fab" type="button" aria-label="Eigenes Rezept hinzuf&uuml;gen" title="Rezept hinzuf&uuml;gen">+</button>
+
+  <!-- Recipe Detail Overlay -->
+  <div id="recipe-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Rezeptdetails">
+    <div class="modal">
+      <button id="modal-close-btn" class="xbtn" type="button" aria-label="Schlie&szlig;en">&#x2715;</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Add Recipe Overlay -->
+  <div id="add-overlay" class="aoverlay" role="dialog" aria-modal="true" aria-label="Rezept hinzuf&uuml;gen">
+    <div class="amodal">
+      <h2 data-i18n="newRecipe">Neues Rezept</h2>
+      <p class="sub" data-i18n="addSub">Manuell eingeben oder Markdown importieren</p>
+      <div class="tabs">
+        <button class="tab on" data-tab="manual" type="button" data-i18n="tabManual">Manuell</button>
+        <button class="tab" data-tab="md" type="button" data-i18n="tabImport">Import</button>
+      </div>
+
+      <!-- Manual Tab -->
+      <div id="tab-manual" class="aform">
+        <label for="f-name" data-i18n="lblNameDe">Name (Deutsch)</label>
+        <input id="f-name" type="text" placeholder="z.B. Spaghetti Carbonara">
+
+        <label for="f-nameit" data-i18n="lblNameIt">Name (Italienisch)</label>
+        <input id="f-nameit" type="text" placeholder="z.B. Spaghetti alla Carbonara">
+
+        <div class="row2">
+          <div>
+            <label for="f-cat" data-i18n="lblCategory">Kategorie</label>
+            <select id="f-cat">
+              <option value="Antipasti">Antipasti</option>
+              <option value="Pasta" selected>Pasta</option>
+              <option value="Risotto">Risotto</option>
+              <option value="Suppe">Suppe</option>
+              <option value="Fisch">Fisch</option>
+              <option value="Fleisch">Fleisch</option>
+              <option value="Gem&uuml;se">Gem&uuml;se</option>
+              <option value="Dessert">Dessert</option>
+              <option value="Sonstiges">Sonstiges</option>
+            </select>
+          </div>
+          <div>
+            <label for="f-diff" data-i18n="lblDifficulty">Schwierigkeit</label>
+            <select id="f-diff">
+              <option value="Einfach">Einfach</option>
+              <option value="Mittel" selected>Mittel</option>
+              <option value="Schwer">Schwer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row3">
+          <div>
+            <label for="f-sv" data-i18n="lblPortions">Portionen</label>
+            <input id="f-sv" type="number" value="4" min="1" max="20">
+          </div>
+          <div>
+            <label for="f-prep" data-i18n="lblPrep">Vorbereitung (Min)</label>
+            <input id="f-prep" type="number" value="15" min="0">
+          </div>
+          <div>
+            <label for="f-cook" data-i18n="lblCook">Kochzeit (Min)</label>
+            <input id="f-cook" type="number" value="30" min="0">
+          </div>
+        </div>
+
+        <label for="f-ing" data-i18n="lblIngredients">Zutaten (eine pro Zeile: Menge &mdash; Zutat)</label>
+        <textarea id="f-ing" placeholder="200 g &mdash; Spaghetti&#10;100 g &mdash; Guanciale&#10;3 &mdash; Eigelb"></textarea>
+
+        <label for="f-steps" data-i18n="lblSteps">Zubereitung (ein Schritt pro Zeile)</label>
+        <textarea id="f-steps" placeholder="Nudeln in Salzwasser kochen.&#10;Guanciale knusprig braten."></textarea>
+
+        <label for="f-tip" data-i18n="lblTips">Tipps (optional)</label>
+        <textarea id="f-tip" rows="2" placeholder="Nur Guanciale verwenden, kein Speck!"></textarea>
+
+        <!-- Photo upload -->
+        <label data-i18n="lblPhoto">Foto (optional)</label>
+        <div id="photo-drop" class="md-drop" role="button" tabindex="0" style="padding:20px" data-i18n="addPhoto">
+          Foto hinzuf&uuml;gen
+        </div>
+        <input id="f-photo" type="file" accept="image/*" style="display:none">
+        <div id="photo-preview" style="display:none;margin-top:12px;text-align:center">
+          <img id="photo-preview-img" style="max-height:160px;border-radius:12px" alt="Vorschau">
+        </div>
+      </div>
+
+      <!-- Import Tab -->
+      <div id="tab-md" style="display:none">
+        <div id="md-drop-zone" class="md-drop" role="button" tabindex="0" aria-label="Markdown-Datei hierher ziehen oder klicken">
+          <div class="icon">&#128196;</div>
+          <p data-i18n="mdDrop" data-i18n-html="1">Markdown-Datei hierher ziehen<br>oder klicken zum Ausw&auml;hlen</p>
+        </div>
+        <input id="md-file" type="file" accept=".md,.txt" style="display:none">
+        <div id="md-preview" class="md-preview"></div>
+
+        <!-- Parsed MD fields -->
+        <div id="md-parsed" style="display:none;margin-top:16px" class="aform">
+          <label for="md-name" data-i18n="lblName">Name</label>
+          <input id="md-name" type="text">
+          <div class="row2">
+            <div>
+              <label for="md-cat" data-i18n="lblCategory">Kategorie</label>
+              <select id="md-cat">
+                <option value="Antipasti">Antipasti</option>
+                <option value="Pasta" selected>Pasta</option>
+                <option value="Risotto">Risotto</option>
+                <option value="Suppe">Suppe</option>
+                <option value="Fisch">Fisch</option>
+                <option value="Fleisch">Fleisch</option>
+                <option value="Gem&uuml;se">Gem&uuml;se</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Sonstiges">Sonstiges</option>
+              </select>
+            </div>
+            <div>
+              <label for="md-diff" data-i18n="lblDifficulty">Schwierigkeit</label>
+              <select id="md-diff">
+                <option value="Einfach">Einfach</option>
+                <option value="Mittel" selected>Mittel</option>
+                <option value="Schwer">Schwer</option>
+              </select>
+            </div>
+          </div>
+          <label for="md-sv" data-i18n="lblPortions">Portionen</label>
+          <input id="md-sv" type="number" value="4" min="1" max="20">
+        </div>
+      </div>
+
+      <div class="abtn-row">
+        <button id="save-recipe-btn" class="save-btn" type="button" data-i18n="saveBtn">Rezept speichern</button>
+        <button id="cancel-add-btn" class="cancel-btn" type="button" data-i18n="cancelBtn">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
