@@ -504,6 +504,7 @@ async function fetchRewePrice(term) {
       name: [brand, desc].filter(Boolean).join(' · ') || term,
       grammage: '',
       retailer,
+      offerId: best.id,
     };
 
     priceCache.set(cacheKey, result);
@@ -542,12 +543,23 @@ async function loadPricesForModal(ingredients) {
 
     const existing = li.querySelector('.rewe-price');
     if (result) {
-      const badge = existing || document.createElement('span');
+      // Bei Wechsel zwischen <a> und <span> altes Element entfernen
+      const wantTag = result.offerId ? 'A' : 'SPAN';
+      let badge = existing;
+      if (badge && badge.tagName !== wantTag) { badge.remove(); badge = null; }
+      if (!badge) {
+        badge = document.createElement(wantTag === 'A' ? 'a' : 'span');
+        li.appendChild(badge);
+      }
       badge.className = 'rewe-price';
       const retailerHtml = result.retailer ? `<small style="opacity:0.65;margin-left:4px;font-weight:500;">${esc(result.retailer)}</small>` : '';
       badge.innerHTML = `${esc(result.price)} €${retailerHtml}`;
       badge.title = result.name;
-      if (!existing) li.appendChild(badge);
+      if (result.offerId) {
+        badge.href = `https://www.marktguru.de/offers/${result.offerId}`;
+        badge.target = '_blank';
+        badge.rel = 'noopener noreferrer';
+      }
     } else {
       existing?.remove();
     }

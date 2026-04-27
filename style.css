@@ -564,7 +564,14 @@ nav {
   padding: 2px 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  text-decoration: none;
   cursor: default;
+  transition: background 0.15s, transform 0.15s;
+}
+a.rewe-price { cursor: pointer; }
+a.rewe-price:hover {
+  background: #fde0db;
+  transform: translateY(-1px);
 }
 .rewe-price.loading {
   color: var(--text-light);
